@@ -10,6 +10,29 @@ const string& Transaction::get_category() const { return category; }
 
 const string& Transaction::get_date() const { return date; }
 
+void Card::in_file(const Transaction& transaction) {
+	ofstream fout;
+	string path = "Transactions";
+	path = path + "_" + card_name + ".txt";
+	fout.open(path, ofstream::app);	
+	if (!fout.is_open()) {
+		cout << "файл не найден" << endl;
+	}
+	else {
+		fout << transaction.get_date() << " " << transaction.get_category() << " " << transaction.get_amount() << endl;
+	}
+}
+
+void Transaction::set_amount(double value) {
+	amount = value;
+}
+void Transaction::set_category(string value) {
+	category = value;
+}
+void Transaction::set_date(string value) {
+	date = value;
+}
+
 Transaction& Transaction::operator=(Transaction& t) {
 	amount = t.amount;
 	category = t.category;
@@ -35,11 +58,32 @@ vector<Transaction> Transaction::sort(vector <Transaction> tran) {
 	return tran;
 }
 
-Card::Card(const string& _name) : card_name{ _name }, all_money{ 0 } {}
+Card::Card(const string& _name) : card_name{ _name }, all_money{ 0 } {
+	ifstream fin;
+	string path = "Transactions";
+	path = path + "_" + card_name + ".txt";
+	fin.open(path);
+	if (!fin.is_open()) {
+		cout << "не найден нужный файл\n\n";
+		return;
+	}
+	string date, category, amount;
+	double num = 0;
+	while (fin >> date >> category >> amount) {
+		num = stod(amount);
+		Transaction t;
+		t.set_amount(num);
+		t.set_category(category);
+		t.set_date(date);
+		transactions.push_back(t);
+	}
+	fin.close();
+}
+
 
 vector<Transaction> Card::get_transactions() { return transactions; };
 
-vector<Transaction> Card::transactions_date(const std::string& date) const {
+vector<Transaction> Card::transactions_date(const string& date) const {
 	vector<Transaction> sort;
 	for (int i = 0; i < transactions.size(); i++) {
 		if (transactions[i].get_date() == date) {
@@ -56,6 +100,7 @@ void Card::set_name(string& _name) {
 void Card::plus_money(const Transaction& transaction) {
 	all_money += transaction.get_amount();
 	transactions.push_back(transaction);
+	in_file(transaction);
 }
 
 const string& Card::get_name()const  { return card_name; }
@@ -85,6 +130,22 @@ void Stats::show_name_card() const {
 		cout << i + 1 << " - " << " Название: " << cards[i].get_name() << endl;
 	}
 	cout << "________________________________" << endl;
+}
+
+void Stats::show_all_transactions(int number) {
+	vector<Transaction> transactions_for_show = cards[number].get_transactions();
+	if (transactions_for_show.empty()) {
+		cout << "отсутствуют транзакции..." << endl;
+		return;
+	}
+	cout << "Список всех транзакций: " << endl;
+	for (int i = 0 ; i < transactions_for_show.size(); i++) {
+		cout << "________________________________" << endl;
+		cout << i + 1 << " - " << "Дата: " << transactions_for_show[i].get_date() << endl
+			<< "Категория: " << transactions_for_show[i].get_category() << endl
+			<< "Сумма: " << transactions_for_show[i].get_amount() << endl;
+		cout << "________________________________" << endl;
+	}
 }
 
 void Stats::all_date(const string& date, int number) const {//Формирование отчетов по затратам и категориям

@@ -48,7 +48,8 @@ void menu(Stats& s1) {
 			<< "2 - добавить новую карту " << endl
 			<< "3 - добавить транзакцию " << endl
 			<< "4 - посмотреть отчеты" << endl
-			<< "5 - выход" << endl;
+			<< "5 - посмотреть все транзакции" << endl	
+			<< "6 - выход" << endl;
 		cin >> menu;
 		system("cls");
 		switch (menu) {
@@ -86,10 +87,17 @@ void menu(Stats& s1) {
 			top_stats(choice, s1);
 			break;
 		case 5:
+			cout << "Выберите номер карты для просмотра транзакций: " << endl;
+			s1.show_name_card();
+			cin >> number;
+			system("cls");
+			s1.show_all_transactions(number - 1);
+			break;
+		case 6:
 			cout << "Выход";
 			break;
 		default:
 			cout << endl << "выбрана неправильная цифра" << endl << endl;
 		}
-	} while (menu != 5);
+	} while (menu != 6);
 }
